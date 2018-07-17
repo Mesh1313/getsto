@@ -1,0 +1,33 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Details</title>
+</head>
+<body>
+	<h1><%= stoDetails.title %></h1>
+	<p>Site</p>
+	<a href="http://<%= sto.url %>" target="_blank"><%= sto.url %></a>
+	<hr/>
+	<p>Brands</p>
+	<%if(sto.brands.length) {%>
+	<ul>
+		<%sto.brands.forEach(function(elem) {%>
+		<li><%= elem %></li>
+		<%});%>
+	</ul>
+	<%} else {%>
+	N/A
+	<%}%>
+	<hr/>
+	<p>Services</p>
+	<%if(sto.services.length) {%>
+	<ul>
+		<%sto.services.forEach(function(elem) {%>
+		<li><%= elem %></li>
+		<%});%>
+	</ul>
+	<%} else {%>
+	N/A
+	<%}%>
+</body>
+</html>
