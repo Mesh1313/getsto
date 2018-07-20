@@ -149,34 +149,35 @@ const getServicesArr = (data) => {
 }
 // Create Stos Collection helpers END
 
-const writeStosCollection = () => {
-	let stoData = stosKh[12];
-	let stoDetails = getStoDetails(stosKh[12]);
+const writeStosCollection = (stoData) => {
+	return new Promise((resolve, reject) => {
+		let stoDetails = getStoDetails(stoData);
 
-	Promise.all([getServiceType(stoData),
-				getBrandsArr(stoDetails),
-				getServicesArr(stoDetails)])
-	.then(resArr => {
-		let newSto = new Sto({
-			id: stoData.id,
-			name: stoData.name,
-			title: stoData.title,
-			tel: stoData.tel,
-			address: stoData.address,
-			lat: stoData.lat,
-			lng: stoData.lng,
-			url: stoDetails.url,
-			service_type: resArr[0],
-			brands: resArr[1],
-			services: resArr[2]
-		});
+		Promise.all([getServiceType(stoData),
+					getBrandsArr(stoDetails),
+					getServicesArr(stoDetails)])
+		.then(resArr => {
+			let newSto = new Sto({
+				id: stoData.id,
+				name: stoData.name,
+				title: stoData.title,
+				tel: stoData.tel,
+				address: stoData.address,
+				lat: stoData.lat,
+				lng: stoData.lng,
+				url: stoDetails.url,
+				service_type: resArr[0],
+				brands: resArr[1],
+				services: resArr[2]
+			});
 
-		newSto.save((err) => {
-			if (err) return console.error('Sto not saved! Err: ', err);
+			newSto.save((err) => {
+				if (err) reject('Sto not saved! Err: ', err);
 
-			console.log('Sto saved');
-		});
-	})
+				resolve(`Sto ID = ${newSto.id} SAVED...`);
+			});
+		})
+	});
 };
 
 const port = 7755;
@@ -187,25 +188,38 @@ app.listen(port, () => {
 	db.openDbConnection();
 	db.connectToDb(
 		() => {
-			// CONTINUE FROM HERE!!!
-			// writeStosCollection(); 
+			let finished = 0;
+			stosKh.forEach((sto) => {
+				writeStosCollection(sto).then((result) => {
+					finished++;
+
+					console.log(result);
+
+					if (stosKh.length === finished) {
+						console.log('Stos db collection filled!!!');
+					}
+				}).catch((err) => {
+					console.error(err);
+				}); 	
+			});
+
+			// Sto
+			// 	.findOne({id: 327})
+			// 	.populate('service_type')
+			// 	.populate('brands')
+			// 	.populate('services')
+			// 	.exec((err, sto) => {
+			// 		if (err) return console.error('Error geting sto: ', err);
+
+			// 		console.log(sto);
+			// 	})
+		}
+	);
+});
 
 
-			Sto
-				.findOne({id: 327})
-				.populate('service_type')
-				.populate('brands')
-				.populate('services')
-				.exec((err, sto) => {
-					if (err) return console.error('Error geting sto: ', err);
-
-					console.log(sto);
-				})
-
-			// Brand.find((err, brands) => {
-			// 	if (err) return console.err("ERROR");
-
-			// 	brands.sort((a, b) => {
+// TO SORT SOMTH
+// 	brands.sort((a, b) => {
 			// 		const A = a.name.toUpperCase();
 			// 		const B = b.name.toUpperCase();
 
@@ -217,9 +231,3 @@ app.listen(port, () => {
 			// 		}
 			// 		return comparison;
 			// 	});
-
-			// 	console.log(brands);
-			// });
-		}
-	);
-});
